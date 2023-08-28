@@ -4,6 +4,7 @@
 #include "QCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AQCharacter::AQCharacter()
@@ -12,11 +13,16 @@ AQCharacter::AQCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComp");
+	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
+
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
 
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input
+
+	bUseControllerRotationYaw = false;  // We want to control yaw with mouse
 }
 
 // Called when the game starts or when spawned
@@ -35,7 +41,42 @@ void AQCharacter::Tick(float DeltaTime)
 
 void AQCharacter::MoveForward(float Value)
 {
-	AddMovementInput(GetActorForwardVector(), Value);
+	FRotator ControlRot = GetControlRotation();
+	ControlRot.Pitch = 0.0f;
+	ControlRot.Roll = 0.0f;
+
+	// 使用控制器的旋转方向来作为移动的方向
+	AddMovementInput(ControlRot.Vector(), Value);
+}
+
+void AQCharacter::MoveRight(float Value)
+{
+	FRotator ControlRot = GetControlRotation();
+	ControlRot.Pitch = 0.0f;
+	ControlRot.Roll = 0.0f;
+
+	// X = Forward (Red)
+	// Y = Right (Green)
+	// Z = Up (Blue)
+
+	// 获得控制器的右方向
+	FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
+	// 使用控制器的右方向来作为移动的方向
+	AddMovementInput(RightVector, Value);
+}
+
+void AQCharacter::PrimaryAttack()
+{
+	// 从骨骼中获取手的位置
+	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	// 在角色的手的位置生成子弹
+	FTransform SpawnTransform = FTransform(GetActorRotation(), HandLocation);
+
+	FActorSpawnParameters SpawnParams;
+	// AlwaysSpawn: 如果碰撞到其他物体，也会生成
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
 }
 
 // Called to bind functionality to input
@@ -43,6 +84,12 @@ void AQCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AQCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AQCharacter::MoveRight);
+
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+
+	// IE_Pressed: 按下时触发，相当于 unity 的 GetKeyDown
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AQCharacter::PrimaryAttack);
 }
 

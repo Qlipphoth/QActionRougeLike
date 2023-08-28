@@ -14,6 +14,12 @@ class QACTIONROUGELIKE_API AQCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+protected:
+
+	UPROPERTY(EditAnywhere)
+	// 子弹，可在编辑器中赋值，类似于 Unity 中的 public GameObject Projectile;
+	TSubclassOf<AActor> ProjectileClass;
+
 public:
 	// Sets default values for this character's properties
 	AQCharacter();
@@ -29,6 +35,10 @@ protected:
 	UCameraComponent* CameraComp;
 
 	void MoveForward(float Value);
+
+	void MoveRight(float Value);
+
+	void PrimaryAttack();
 
 public:	
 	// Called every frame
