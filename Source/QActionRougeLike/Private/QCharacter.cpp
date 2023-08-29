@@ -88,6 +88,8 @@ void AQCharacter::PrimaryAttack_TimeElapsed()
 	FActorSpawnParameters SpawnParams;
 	// AlwaysSpawn: 如果碰撞到其他物体，也会生成
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	// 设置生成的子弹的拥有者
+	SpawnParams.Instigator = this;
 
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
 }

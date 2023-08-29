@@ -16,12 +16,13 @@ AQRedBarrel::AQRedBarrel()
 	RootComponent = MeshComp;
 
 	MeshComp->SetSimulatePhysics(true);
-	MeshComp->OnComponentHit.AddDynamic(this, &AQRedBarrel::OnHit);
+	// bind the OnHit function to the OnComponentHit event
+	MeshComp->OnComponentHit.AddDynamic(this, &AQRedBarrel::OnHit);  
 
 	RadialForceComp = CreateAbstractDefaultSubobject<URadialForceComponent>("RadialForceComp");
 	RadialForceComp->SetupAttachment(RootComponent);
 	RadialForceComp->Radius = 700.0f;
-	RadialForceComp->bImpulseVelChange = true;
+	RadialForceComp->bImpulseVelChange = true;  // make it so that the impulse is not affected by mass
 	RadialForceComp->ForceStrength = 2000.0f;
 
 }

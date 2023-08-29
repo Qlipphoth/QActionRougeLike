@@ -21,6 +21,7 @@ public:
 	float TargetPitch;
 
 	// _Implementation means that this function is implemented in C++
+	// BlueprintNativeEvent means that this function can be implemented in C++ or in Blueprint
 	void Interact_Implementation(APawn* InstigatorPawn);
 
 public:	
@@ -31,10 +32,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = "GamePlayInterface")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QItemChest")
 	UStaticMeshComponent* BaseMesh;  // BaseMesh is the root component
 
-	UPROPERTY(EditAnywhere, Category = "GamePlayInterface")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QItemChest")
 	UStaticMeshComponent* LidMesh;  // LidMesh is a child of BaseMesh
 
 public:	
