@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "QInteractionComponent.h"
+#include "Animation/AnimMontage.h"
 
 // Sets default values
 AQCharacter::AQCharacter()
@@ -19,6 +21,8 @@ AQCharacter::AQCharacter()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	InteractionComp = CreateDefaultSubobject<UQInteractionComponent>("InteractionComp");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input
 
@@ -67,6 +71,15 @@ void AQCharacter::MoveRight(float Value)
 
 void AQCharacter::PrimaryAttack()
 {
+	// 播放动画
+	PlayAnimMontage(AttackAnim);
+	// 设置定时器，0.2 秒后调用 PrimaryAttack_TimeElapsed
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+		&AQCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+}
+
+void AQCharacter::PrimaryAttack_TimeElapsed()
+{
 	// 从骨骼中获取手的位置
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 	// 在角色的手的位置生成子弹
@@ -77,6 +90,11 @@ void AQCharacter::PrimaryAttack()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
+}
+
+void AQCharacter::PrimaryInteract()
+{
+	InteractionComp->PrimaryInteract();
 }
 
 // Called to bind functionality to input
@@ -91,5 +109,6 @@ void AQCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	// IE_Pressed: 按下时触发，相当于 unity 的 GetKeyDown
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AQCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AQCharacter::PrimaryInteract);
 }
 

@@ -8,6 +8,8 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UQInteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class QACTIONROUGELIKE_API AQCharacter : public ACharacter
@@ -16,9 +18,15 @@ class QACTIONROUGELIKE_API AQCharacter : public ACharacter
 
 protected:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	// 子弹，可在编辑器中赋值，类似于 Unity 中的 public GameObject Projectile;
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	// 攻击动画，可在编辑器中赋值，类似于 Unity 中的 public AnimationClip AttackAnim;
+	UAnimMontage* AttackAnim;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
 
 public:
 	// Sets default values for this character's properties
@@ -34,11 +42,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
+	UQInteractionComponent* InteractionComp;
+
 	void MoveForward(float Value);
 
 	void MoveRight(float Value);
 
 	void PrimaryAttack();
+
+	void PrimaryAttack_TimeElapsed();
+
+	void PrimaryInteract();
 
 public:	
 	// Called every frame
