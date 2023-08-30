@@ -21,6 +21,7 @@ AQRedBarrel::AQRedBarrel()
 
 	RadialForceComp = CreateAbstractDefaultSubobject<URadialForceComponent>("RadialForceComp");
 	RadialForceComp->SetupAttachment(RootComponent);
+	RadialForceComp->SetAutoActivate(false);  // disable the component at first
 	RadialForceComp->Radius = 700.0f;
 	RadialForceComp->bImpulseVelChange = true;  // make it so that the impulse is not affected by mass
 	RadialForceComp->ForceStrength = 2000.0f;

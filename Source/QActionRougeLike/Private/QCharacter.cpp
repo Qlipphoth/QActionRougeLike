@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "QInteractionComponent.h"
 #include "Animation/AnimMontage.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AQCharacter::AQCharacter()
@@ -82,8 +83,37 @@ void AQCharacter::PrimaryAttack_TimeElapsed()
 {
 	// 从骨骼中获取手的位置
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	// 在角色的手的位置生成子弹
-	FTransform SpawnTransform = FTransform(GetActorRotation(), HandLocation);
+	
+	// 设置射线检测的形状
+	FCollisionShape CollisionShape;
+	CollisionShape.SetSphere(20.0f);
+
+	// 设置射线检测的参数
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);  // 忽略玩家角色
+
+	// 设置射线检测的参数
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+
+	FVector TraceStart = GetPawnViewLocation();
+	// endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
+	FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 5000.0f;
+
+	FHitResult HitResult;
+	// 射线检测
+	if (GetWorld()->SweepSingleByObjectType(HitResult, TraceStart, TraceEnd, 
+		FQuat::Identity, ObjectQueryParams, CollisionShape, QueryParams))
+	{
+		TraceEnd = HitResult.ImpactPoint;
+	}
+
+	// 生成子弹的旋转方向
+	FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
+	// 生成子弹的位置
+	FTransform SpawnTransform = FTransform(ProjRotation, HandLocation);
 
 	FActorSpawnParameters SpawnParams;
 	// AlwaysSpawn: 如果碰撞到其他物体，也会生成
@@ -112,5 +142,8 @@ void AQCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	// IE_Pressed: 按下时触发，相当于 unity 的 GetKeyDown
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AQCharacter::PrimaryAttack);
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AQCharacter::PrimaryInteract);
+	// 直接使用 ACharacter 的 Jump 函数
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+
 }
 
