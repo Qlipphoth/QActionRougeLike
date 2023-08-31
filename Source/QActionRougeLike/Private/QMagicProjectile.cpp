@@ -5,7 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-
+#include "QAttributeComponent.h"
 
 // Sets default values
 AQMagicProjectile::AQMagicProjectile()
@@ -15,6 +15,7 @@ AQMagicProjectile::AQMagicProjectile()
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
 	SphereComp->SetCollisionProfileName("Projectile");  // 设置碰撞检测的类型
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AQMagicProjectile::OnActorOverlap);  // 绑定碰撞检测的回调函数
 	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
@@ -32,6 +33,25 @@ void AQMagicProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp, 
+	AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, 
+	bool bFromSweep, const FHitResult &SweepResult)
+{
+	if (OtherActor)
+	{
+		// 获取角色的属性组件
+		// UQAttributeComponent::StaticClass() 返回的是 UQAttributeComponent 类的 UClass 对象
+		UQAttributeComponent* AttributeComp = Cast<UQAttributeComponent>(
+			OtherActor->GetComponentByClass(UQAttributeComponent::StaticClass()));
+		if (AttributeComp) 
+		{
+			// 对角色的生命值进行修改
+			AttributeComp->ApplyHealthChange(-10.0f);
+			Destroy();
+		}
+	}
 }
 
 // Called every frame

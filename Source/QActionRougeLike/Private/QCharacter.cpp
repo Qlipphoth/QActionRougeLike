@@ -8,6 +8,7 @@
 #include "QInteractionComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "QAttributeComponent.h"
 
 // Sets default values
 AQCharacter::AQCharacter()
@@ -19,14 +20,14 @@ AQCharacter::AQCharacter()
 	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
 
-
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	InteractionComp = CreateDefaultSubobject<UQInteractionComponent>("InteractionComp");
 
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input
+	AttributeComp = CreateDefaultSubobject<UQAttributeComponent>("AttributeComp");
 
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input
 	bUseControllerRotationYaw = false;  // We want to control yaw with mouse
 }
 

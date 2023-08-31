@@ -10,6 +10,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UQInteractionComponent;
 class UAnimMontage;
+class UQAttributeComponent;
 
 UCLASS()
 class QACTIONROUGELIKE_API AQCharacter : public ACharacter
@@ -44,6 +45,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
 	UQInteractionComponent* InteractionComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
+	UQAttributeComponent* AttributeComp;
 
 	void MoveForward(float Value);
 

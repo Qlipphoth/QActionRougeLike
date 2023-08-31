@@ -35,6 +35,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QMagicProjectile")
 	UParticleSystemComponent* EffectComp;
 
+	// 碰撞检测回调函数
+	UFUNCTION()
+	void OnActorOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
+		bool bFromSweep, const FHitResult& SweepResult);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
