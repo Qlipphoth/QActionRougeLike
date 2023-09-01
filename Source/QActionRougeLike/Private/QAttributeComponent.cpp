@@ -13,5 +13,9 @@ UQAttributeComponent::UQAttributeComponent()
 bool UQAttributeComponent::ApplyHealthChange(float Delta)
 {
 	Health += Delta;
+
+	// 触发生命值变化的委托
+	OnHealthChangeDelegate.Broadcast(nullptr, this, Health, Delta);
+
 	return true;
 }

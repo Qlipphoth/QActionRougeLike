@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "DrawDebugHelpers.h"
+#include "QAttributeComponent.h"
 
 // Sets default values
 AQRedBarrel::AQRedBarrel()
@@ -45,6 +46,17 @@ void AQRedBarrel::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 
 	FString CombinedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
 	DrawDebugString(GetWorld(), Hit.ImpactPoint, CombinedString, nullptr, FColor::Green, 2.0f, true);
+
+	if (OtherActor) {
+		// get the attribute component of the other actor
+		UQAttributeComponent* AttributeComp = Cast<UQAttributeComponent>(
+			OtherActor->GetComponentByClass(UQAttributeComponent::StaticClass()));
+		if (AttributeComp) {
+			// apply damage to the other actor
+			AttributeComp->ApplyHealthChange(-20.0f);
+		}
+	}
+
 }
 
 // Called when the game starts or when spawned

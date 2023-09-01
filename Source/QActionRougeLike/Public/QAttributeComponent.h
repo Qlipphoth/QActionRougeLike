@@ -6,6 +6,13 @@
 #include "Components/ActorComponent.h"
 #include "QAttributeComponent.generated.h"
 
+// 声明一个委托，用于角色生命值变化时的回调，类似于 Unity 中的 public delegate void OnHealthChangeDelegate();
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChangeSignature, 
+	AActor*, InstigatorActor,
+	UQAttributeComponent*, OwningComp, 
+	float, NewHealth, 
+	float, Delta
+);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class QACTIONROUGELIKE_API UQAttributeComponent : public UActorComponent
@@ -38,5 +45,9 @@ protected:
 
 public:	
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float Delta);		
+	bool ApplyHealthChange(float Delta);	
+
+	// BlueprintAssignable : can be assigned in the blueprint editor
+	UPROPERTY(BlueprintAssignable, Category = "Attributes")
+	FOnHealthChangeSignature OnHealthChangeDelegate;	
 };
