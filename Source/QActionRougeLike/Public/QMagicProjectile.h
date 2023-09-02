@@ -3,15 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "QProjectileBase.h"
 #include "QMagicProjectile.generated.h"
 
-class USphereComponent;
-class UProjectileMovementComponent;
-class UParticleSystemComponent;
-
 UCLASS()
-class QACTIONROUGELIKE_API AQMagicProjectile : public AActor
+class QACTIONROUGELIKE_API AQMagicProjectile : public AQProjectileBase
 {
 	GENERATED_BODY()
 	
@@ -20,29 +16,14 @@ public:
 	AQMagicProjectile();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
-	// 用于碰撞检测的球体组件
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QMagicProjectile")
-	USphereComponent* SphereComp;
-
-	// 用于移动的组件
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QMagicProjectile")
-	UProjectileMovementComponent* MovementComp;
-
-	// 用于播放特效的组件
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QMagicProjectile")
-	UParticleSystemComponent* EffectComp;
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DamageAmount;
 
 	// 碰撞检测回调函数
 	UFUNCTION()
 	void OnActorOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, 
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, 
 		bool bFromSweep, const FHitResult& SweepResult);
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

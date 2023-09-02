@@ -21,7 +21,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	// 子弹，可在编辑器中赋值，类似于 Unity 中的 public GameObject Projectile;
-	TSubclassOf<AActor> ProjectileClass;
+	TSubclassOf<AActor> PrimaryProjectileClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	TSubclassOf<AActor> DashProjectileClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	TSubclassOf<AActor> BlackHoleProjectileClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	// 攻击动画，可在编辑器中赋值，类似于 Unity 中的 public AnimationClip AttackAnim;
@@ -34,8 +40,8 @@ public:
 	AQCharacter();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	// // Called when the game starts or when spawned
+	// virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
 	USpringArmComponent* SpringArmComp;
@@ -53,15 +59,31 @@ protected:
 
 	void MoveRight(float Value);
 
+	void SpwanProjectile(TSubclassOf<AActor> ProjectileClass);
+
 	void PrimaryAttack();
 
 	void PrimaryAttack_TimeElapsed();
 
+	void DashAttack();
+
+	void DashAttack_TimeElapsed();
+
+	void BlackHoleAttack();
+
+	void BlackHoleAttack_TimeElapsed();
+
 	void PrimaryInteract();
 
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent* OwningComp, 
+		float NewHealth, float Delta);
+
+	virtual void PostInitializeComponents() override;
+
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	// // Called every frame
+	// virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

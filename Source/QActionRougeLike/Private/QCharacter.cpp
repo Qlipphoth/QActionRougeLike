@@ -31,18 +31,10 @@ AQCharacter::AQCharacter()
 	bUseControllerRotationYaw = false;  // We want to control yaw with mouse
 }
 
-// Called when the game starts or when spawned
-void AQCharacter::BeginPlay()
+void AQCharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AQCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
+	Super::PostInitializeComponents();
+	AttributeComp->OnHealthChangeDelegate.AddDynamic(this, &AQCharacter::OnHealthChanged);
 }
 
 void AQCharacter::MoveForward(float Value)
@@ -71,16 +63,7 @@ void AQCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
-void AQCharacter::PrimaryAttack()
-{
-	// 播放动画
-	PlayAnimMontage(AttackAnim);
-	// 设置定时器，0.2 秒后调用 PrimaryAttack_TimeElapsed
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-		&AQCharacter::PrimaryAttack_TimeElapsed, 0.2f);
-}
-
-void AQCharacter::PrimaryAttack_TimeElapsed()
+void AQCharacter::SpwanProjectile(TSubclassOf<AActor> ProjectileClass)
 {
 	// 从骨骼中获取手的位置
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
@@ -125,6 +108,49 @@ void AQCharacter::PrimaryAttack_TimeElapsed()
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
 }
 
+void AQCharacter::PrimaryAttack()
+{
+	// 播放动画
+	PlayAnimMontage(AttackAnim);
+	// 设置定时器，0.2 秒后调用 PrimaryAttack_TimeElapsed
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+		&AQCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+}
+
+void AQCharacter::PrimaryAttack_TimeElapsed()
+{
+	SpwanProjectile(PrimaryProjectileClass);
+}
+
+void AQCharacter::DashAttack()
+{
+	// 播放动画
+	PlayAnimMontage(AttackAnim);
+	// 设置定时器，0.2 秒后调用 DashAttack_TimeElapsed
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+		&AQCharacter::DashAttack_TimeElapsed, 0.2f);
+}
+
+void AQCharacter::DashAttack_TimeElapsed()
+{
+	SpwanProjectile(DashProjectileClass);
+}
+
+void AQCharacter::BlackHoleAttack()
+{
+	// 播放动画
+	PlayAnimMontage(AttackAnim);
+	// 设置定时器，0.2 秒后调用 BlackHoleAttack_TimeElapsed
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+		&AQCharacter::BlackHoleAttack_TimeElapsed, 0.2f);
+}
+
+void AQCharacter::BlackHoleAttack_TimeElapsed()
+{
+	SpwanProjectile(BlackHoleProjectileClass);
+}
+
+
 void AQCharacter::PrimaryInteract()
 {
 	InteractionComp->PrimaryInteract();
@@ -139,12 +165,26 @@ void AQCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-
-	// IE_Pressed: 按下时触发，相当于 unity 的 GetKeyDown
-	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AQCharacter::PrimaryAttack);
-	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AQCharacter::PrimaryInteract);
 	// 直接使用 ACharacter 的 Jump 函数
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 
+
+	// IE_Pressed: 按下时触发，相当于 unity 的 GetKeyDown
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AQCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("DashAttack", IE_Pressed, this, &AQCharacter::DashAttack);
+	PlayerInputComponent->BindAction("BlackHoleAttack", IE_Pressed, this, &AQCharacter::BlackHoleAttack);
+
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AQCharacter::PrimaryInteract);
+	
 }
 
+void AQCharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent* OwningComp, 
+	float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
+	
+}

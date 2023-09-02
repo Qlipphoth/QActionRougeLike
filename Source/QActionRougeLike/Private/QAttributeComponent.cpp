@@ -10,6 +10,11 @@ UQAttributeComponent::UQAttributeComponent()
 
 }
 
+bool UQAttributeComponent::IsAlive() const
+{
+	return Health > 0.0f;
+}
+
 bool UQAttributeComponent::ApplyHealthChange(float Delta)
 {
 	Health += Delta;

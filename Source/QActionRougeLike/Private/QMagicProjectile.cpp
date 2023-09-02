@@ -10,29 +10,12 @@
 // Sets default values
 AQMagicProjectile::AQMagicProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+ 	SphereComp->SetSphereRadius(20.0f);
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AQMagicProjectile::OnActorOverlap);
 
-	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
-	SphereComp->SetCollisionProfileName("Projectile");  // 设置碰撞检测的类型
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AQMagicProjectile::OnActorOverlap);  // 绑定碰撞检测的回调函数
-	RootComponent = SphereComp;
-
-	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
-	EffectComp->SetupAttachment(RootComponent);
-
-	MovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("MovementComp");
-	MovementComp->InitialSpeed = 1000.0f;  // 初始速度
-	MovementComp->bRotationFollowsVelocity = true;  // 速度改变时，自动旋转
-	MovementComp->bInitialVelocityInLocalSpace = true;  // 初始速度使用本地坐标系
-
-}
-
-// Called when the game starts or when spawned
-void AQMagicProjectile::BeginPlay()
-{
-	Super::BeginPlay();
-	
+	InitialLifeSpan = 10.0f;  // 设置生命周期
+	DamageAmount = 10.0f;
+	MoveComp->InitialSpeed = 2000.0f;
 }
 
 void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp, 
@@ -48,16 +31,9 @@ void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp,
 		if (AttributeComp) 
 		{
 			// 对角色的生命值进行修改
-			AttributeComp->ApplyHealthChange(-10.0f);
+			AttributeComp->ApplyHealthChange(-DamageAmount);
 			Destroy();
 		}
 	}
-}
-
-// Called every frame
-void AQMagicProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
