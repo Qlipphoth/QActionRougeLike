@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "QAICharacter.generated.h"
 
+class UPawnSensingComponent;
+
 UCLASS()
 class QACTIONROUGELIKE_API AQAICharacter : public ACharacter
 {
@@ -16,14 +18,13 @@ public:
 	AQAICharacter();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	UPawnSensingComponent* PawnSensingComp;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION()
+	void OnPawnSeen(APawn* SeenPawn);
+
+	virtual void PostInitializeComponents() override;
 
 };
