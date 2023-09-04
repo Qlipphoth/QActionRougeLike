@@ -53,7 +53,7 @@ void AQRedBarrel::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 			OtherActor->GetComponentByClass(UQAttributeComponent::StaticClass()));
 		if (AttributeComp) {
 			// apply damage to the other actor
-			AttributeComp->ApplyHealthChange(-20.0f);
+			AttributeComp->ApplyHealthChange(this, -20.0f);
 		}
 	}
 

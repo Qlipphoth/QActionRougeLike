@@ -7,6 +7,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "QAttributeComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "BrainComponent.h"
+#include "QAttributeComponent.h"
 
 // Sets default values
 AQAICharacter::AQAICharacter()
@@ -15,7 +18,7 @@ AQAICharacter::AQAICharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // AI 控制器自动获取控制权
 
 	AttributeComp = CreateDefaultSubobject<UQAttributeComponent>(TEXT("AttributeComp"));
-
+	TimeToHitParamName = TEXT("TimeToHit");
 }
 
 void AQAICharacter::PostInitializeComponents()
@@ -23,18 +26,52 @@ void AQAICharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &AQAICharacter::OnPawnSeen);
+	AttributeComp->OnHealthChangeDelegate.AddDynamic(this, &AQAICharacter::OnHealthChanged);
 }
 
-void AQAICharacter::OnPawnSeen(APawn* SeenPawn)
+void AQAICharacter::SetTargetActor(AActor* NewTarget)
 {
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if (AIController)
 	{
-		UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
-		BlackboardComp->SetValueAsObject(TEXT("TargetActor"), SeenPawn);
-
-		DrawDebugString(GetWorld(), GetActorLocation(), "OnSeen Player", 
-			nullptr, FColor::Yellow, 4.0f, true);
+		AIController->GetBlackboardComponent()->SetValueAsObject(TEXT("TargetActor"), NewTarget);	
 	}
 }
 
+void AQAICharacter::OnPawnSeen(APawn* SeenPawn)
+{
+	SetTargetActor(SeenPawn);
+	DrawDebugString(GetWorld(), GetActorLocation(), "OnSeen Player", 
+			nullptr, FColor::Yellow, 4.0f, true);
+}
+
+void AQAICharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+	if (Delta < 0.0f)
+	{
+		if (InstigatorActor != this)
+		{
+			SetTargetActor(InstigatorActor);
+		}
+
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+
+		if (NewHealth <= 0.0f)
+		{
+			// Stop BT
+			AAIController* AIController = Cast<AAIController>(GetController());
+			if (AIController)
+			{
+				AIController->BrainComponent->StopLogic("Dead");
+			}
+
+			// ragdoll
+			GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+			GetMesh()->SetAllBodiesSimulatePhysics(true);
+			GetMesh()->bBlendPhysics = true;
+
+			// set life span
+			SetLifeSpan(10.0f);
+		}
+	}
+}

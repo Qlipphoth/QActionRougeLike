@@ -31,7 +31,7 @@ void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp,
 		if (AttributeComp) 
 		{
 			// 对角色的生命值进行修改
-			AttributeComp->ApplyHealthChange(-DamageAmount);
+			AttributeComp->ApplyHealthChange(this->GetInstigator(), -DamageAmount);
 			// Destroy()
 			Explode();
 		}

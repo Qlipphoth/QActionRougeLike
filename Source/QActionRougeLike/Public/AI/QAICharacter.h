@@ -21,6 +21,9 @@ public:
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
+	FName TimeToHitParamName;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
@@ -29,6 +32,12 @@ protected:
 	UFUNCTION()
 	void OnPawnSeen(APawn* SeenPawn);
 
+	UFUNCTION()
+	void SetTargetActor(AActor* NewTarget);
+
 	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 };

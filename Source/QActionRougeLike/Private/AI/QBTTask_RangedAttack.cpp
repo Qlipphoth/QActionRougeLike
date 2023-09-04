@@ -5,6 +5,12 @@
 #include "AI/QAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+#include "QAttributeComponent.h"
+
+UQBTTask_RangedAttack::UQBTTask_RangedAttack()
+{
+    MaxBulletSpread = 5.0f;
+}
 
 EBTNodeResult::Type UQBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -20,11 +26,17 @@ EBTNodeResult::Type UQBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& O
         AActor* TargetActor = Cast<AActor>(BlackboardComponent->GetValueAsObject(TEXT("TargetActor")));
         if (TargetActor == nullptr) return EBTNodeResult::Failed;
 
+        if (!UQAttributeComponent::IsActorAlive(TargetActor)) return EBTNodeResult::Failed;
+
         FVector Direction = TargetActor->GetActorLocation() - MuzzleLocation;
         FRotator Rotation = Direction.Rotation();
 
+        Rotation.Pitch += FMath::RandRange(-MaxBulletSpread, MaxBulletSpread);
+        Rotation.Yaw += FMath::RandRange(-MaxBulletSpread, MaxBulletSpread);
+
         FActorSpawnParameters SpawnParameters;
         SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        SpawnParameters.Instigator = MyCharacter;
 
         AActor* Projectile = GetWorld()->SpawnActor<AActor>(
             ProjectileClass, MuzzleLocation, Rotation, SpawnParameters);

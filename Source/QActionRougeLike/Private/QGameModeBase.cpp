@@ -8,6 +8,7 @@
 #include "AI/QAICharacter.h"
 #include "QAttributeComponent.h"
 #include "EngineUtils.h"
+#include "DrawDebugHelpers.h"
 
 
 AQGameModeBase::AQGameModeBase()
@@ -25,6 +26,12 @@ void AQGameModeBase::StartPlay()
 
 void AQGameModeBase::SpawnBotTimerElapsed()
 {
+    int Count = CountOfBots();
+
+    // if (Count >= NumOfBotsToSpawn) return;
+    if (DifficultyCurve && Count >= DifficultyCurve->GetFloatValue(GetWorld()->GetTimeSeconds()))
+        return;
+
     UEnvQueryInstanceBlueprintWrapper* QueryInstance = UEnvQueryManager::RunEQSQuery(
         this, SpawnBotQuery, this, EEnvQueryRunMode::RandomBest5Pct, nullptr);
     if (ensure(QueryInstance)) {
@@ -38,8 +45,7 @@ int AQGameModeBase::CountOfBots()
     for (TActorIterator<AQAICharacter> It(GetWorld()); It; ++It)
     {
         AQAICharacter* Bot = *It;
-        UQAttributeComponent* AttributeComp =  Cast<UQAttributeComponent>(
-            Bot->GetComponentByClass(UQAttributeComponent::StaticClass()));
+        UQAttributeComponent* AttributeComp = UQAttributeComponent::GetAttributes(Bot);
         if (AttributeComp && AttributeComp->IsAlive()) {
             Count++;
         }
@@ -56,12 +62,6 @@ void AQGameModeBase::OnQueryCompleted(
         return;
     }
 
-    int Count = CountOfBots();
-
-    // if (Count >= NumOfBotsToSpawn) return;
-    if (DifficultyCurve && Count >= DifficultyCurve->GetFloatValue(GetWorld()->GetTimeSeconds()))
-        return;
-
     TArray<FVector> locations = QueryInstance->GetResultsAsLocations();
 
     if (locations.IsValidIndex(0))
@@ -70,6 +70,7 @@ void AQGameModeBase::OnQueryCompleted(
         // 设置为 AdjustIfPossibleButAlwaysSpawn，如果位置被占用，会自动调整位置
         SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
         GetWorld()->SpawnActor<AActor>(BotToSpawn, locations[0], FRotator::ZeroRotator, SpawnParams);
+        DrawDebugSphere(GetWorld(), locations[0], 50.0f, 20, FColor::Blue, false, 60.0f);
     }
 }
 

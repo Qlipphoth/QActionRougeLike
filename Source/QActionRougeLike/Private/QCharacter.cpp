@@ -9,6 +9,7 @@
 #include "Animation/AnimMontage.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "QAttributeComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AQCharacter::AQCharacter()
@@ -84,7 +85,8 @@ void AQCharacter::SpwanProjectile(TSubclassOf<AActor> ProjectileClass)
 
 	FVector TraceStart = GetPawnViewLocation();
 	// endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
-	FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 5000.0f;
+	FRotator Rotator = GetControlRotation();  // 方向修正
+	FVector TraceEnd = TraceStart + Rotator.Vector() * 5000.0f;
 
 	FHitResult HitResult;
 	// 射线检测
@@ -92,10 +94,13 @@ void AQCharacter::SpwanProjectile(TSubclassOf<AActor> ProjectileClass)
 		FQuat::Identity, ObjectQueryParams, CollisionShape, QueryParams))
 	{
 		TraceEnd = HitResult.ImpactPoint;
+		DrawDebugSphere(GetWorld(), TraceEnd, 20.0f, 8, FColor::Red, false, 2.0f);
 	}
 
 	// 生成子弹的旋转方向
-	FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
+	// FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
+	FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
+
 	// 生成子弹的位置
 	FTransform SpawnTransform = FTransform(ProjRotation, HandLocation);
 
