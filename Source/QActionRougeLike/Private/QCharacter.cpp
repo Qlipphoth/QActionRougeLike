@@ -186,5 +186,4 @@ void AQCharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent*
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
 	}
-	
 }

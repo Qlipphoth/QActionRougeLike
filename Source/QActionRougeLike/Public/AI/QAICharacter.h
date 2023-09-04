@@ -7,6 +7,7 @@
 #include "QAICharacter.generated.h"
 
 class UPawnSensingComponent;
+class UQAttributeComponent;
 
 UCLASS()
 class QACTIONROUGELIKE_API AQAICharacter : public ACharacter
@@ -21,6 +22,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UQAttributeComponent* AttributeComp;
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* SeenPawn);

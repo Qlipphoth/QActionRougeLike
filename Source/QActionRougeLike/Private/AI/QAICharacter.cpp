@@ -5,12 +5,16 @@
 #include "AIController.h"
 #include "Perception/PawnSensingComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "QAttributeComponent.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
 AQAICharacter::AQAICharacter()
 {
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // AI 控制器自动获取控制权
+
+	AttributeComp = CreateDefaultSubobject<UQAttributeComponent>(TEXT("AttributeComp"));
 
 }
 
