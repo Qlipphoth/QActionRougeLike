@@ -183,6 +183,11 @@ void AQCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	
 }
 
+void AQCharacter::HealSelf(float HealAmount /*= 100.0f*/)
+{
+	AttributeComp->ApplyHealthChange(this, HealAmount);
+}
+
 void AQCharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent* OwningComp, 
 	float NewHealth, float Delta)
 {

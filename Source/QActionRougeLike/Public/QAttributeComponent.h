@@ -50,7 +50,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes", meta = (ClampMin = 0.0f))
 	float Health;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes", meta = (ClampMin = 0.0f))
+	float HealthMax;
+
 public:	
+	
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool Kill(AActor* Instigator);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	float GetHealthMax() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool IsAlive() const;

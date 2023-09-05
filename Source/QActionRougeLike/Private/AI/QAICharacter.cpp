@@ -10,6 +10,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "BrainComponent.h"
 #include "QAttributeComponent.h"
+#include "QWorldUserWidget.h"
+
 
 // Sets default values
 AQAICharacter::AQAICharacter()
@@ -55,6 +57,17 @@ void AQAICharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponen
 		}
 
 		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParamName, GetWorld()->TimeSeconds);
+
+		// HealthBar
+		if (ActivateHealthBar == nullptr)
+		{
+			ActivateHealthBar = CreateWidget<UQWorldUserWidget>(GetWorld(), HealthBarWidget);
+			if (ActivateHealthBar)
+			{
+				ActivateHealthBar->AttachedActor = this;
+				ActivateHealthBar->AddToViewport();
+			}
+		}
 
 		if (NewHealth <= 0.0f)
 		{

@@ -88,4 +88,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// Exec 函数，可在控制台中调用，类似于 Unity 中的 [Command] 函数
+	UFUNCTION(Exec)
+	void HealSelf(float HealAmount = 100.0f);
+
 };

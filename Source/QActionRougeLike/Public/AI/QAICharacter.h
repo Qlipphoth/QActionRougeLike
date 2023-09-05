@@ -8,6 +8,7 @@
 
 class UPawnSensingComponent;
 class UQAttributeComponent;
+class UQWorldUserWidget;
 
 UCLASS()
 class QACTIONROUGELIKE_API AQAICharacter : public ACharacter
@@ -28,6 +29,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UQAttributeComponent* AttributeComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UQWorldUserWidget> HealthBarWidget;
+
+	UPROPERTY()
+	UQWorldUserWidget* ActivateHealthBar;
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* SeenPawn);

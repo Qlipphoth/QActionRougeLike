@@ -74,4 +74,15 @@ void AQGameModeBase::OnQueryCompleted(
     }
 }
 
+void AQGameModeBase::SlayAll()
+{
+    for (TActorIterator<AQAICharacter> It(GetWorld()); It; ++It)
+    {
+        AQAICharacter* Bot = *It;
+        UQAttributeComponent* AttributeComp = UQAttributeComponent::GetAttributes(Bot);
+        if (AttributeComp && AttributeComp->IsAlive()) {
+            AttributeComp->Kill(this);  // pass player as instigator
+        }
+    }
+}
 

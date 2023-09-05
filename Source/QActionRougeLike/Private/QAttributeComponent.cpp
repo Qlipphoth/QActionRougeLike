@@ -6,8 +6,18 @@
 // Sets default values for this component's properties
 UQAttributeComponent::UQAttributeComponent()
 {
-	Health = 100.0f;
+	HealthMax = 100.0f;
+	Health = HealthMax;
+}
 
+bool UQAttributeComponent::Kill(AActor* Instigator)
+{
+	return ApplyHealthChange(Instigator, -HealthMax);
+}
+
+float UQAttributeComponent::GetHealthMax() const
+{
+	return HealthMax;
 }
 
 bool UQAttributeComponent::IsAlive() const
@@ -16,13 +26,22 @@ bool UQAttributeComponent::IsAlive() const
 }
 
 bool UQAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
-{
-	Health += Delta;
+{	
+	// 如果角色不可被伤害，则返回 false
+	if (!GetOwner()->CanBeDamaged())
+	{
+		return false;
+	}
+
+	float oldHealth = Health;
+	Health = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
+
+	float ActualDelta = Health - oldHealth;
 
 	// 触发生命值变化的委托
 	OnHealthChangeDelegate.Broadcast(InstigatorActor, this, Health, Delta);
 
-	return true;
+	return ActualDelta != 0.0f;
 }
 
 UQAttributeComponent* UQAttributeComponent::GetAttributes(AActor* FromActor)
