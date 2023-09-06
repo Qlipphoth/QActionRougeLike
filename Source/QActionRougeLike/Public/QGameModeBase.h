@@ -39,6 +39,9 @@ protected:
 	void SpawnBotTimerElapsed();
 
 	UFUNCTION()
+	void RespawnPlayerElapsed(AController* Controller);
+
+	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
 	int CountOfBots();
@@ -46,6 +49,8 @@ protected:
 public:
 
 	AQGameModeBase();
+
+	virtual void OnActorKilled(AActor* VictimActor, AActor* KillerActor);
 
 	virtual void StartPlay() override;
 

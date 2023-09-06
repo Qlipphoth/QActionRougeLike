@@ -5,6 +5,9 @@
 #include "QGamePlayInterface.h"
 #include "DrawDebugHelpers.h"
 
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(
+	TEXT("Q.DebugDrawInteraction"), false, TEXT("Enable/Disable debug draw for interaction"), ECVF_Cheat);
+
 // Sets default values for this component's properties
 UQInteractionComponent::UQInteractionComponent()
 {
@@ -37,6 +40,8 @@ void UQInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UQInteractionComponent::PrimaryInteract()
 {
+	bool bDebugDraw = CVarDebugDrawInteraction.GetValueOnGameThread();
+
 	// Create a collision query params object
 	FCollisionObjectQueryParams ObjectQueryParams;
 	// ECC_WorldDynamic is the default collision channel for actors
@@ -73,7 +78,12 @@ void UQInteractionComponent::PrimaryInteract()
 				APawn* Pawn = Cast<APawn>(Owner);  // Cast the owner to a pawn
 				// Call the Interact_Implementation function
 				IQGamePlayInterface::Execute_Interact(HitActor, Pawn);  
-				DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, Radius, 16, DebugColor, false, 2.0f);
+				
+				if (bDebugDraw)
+				{
+					DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, Radius, 16, DebugColor, false, 2.0f);
+				}
+	
 				break;
 			}
 		}
@@ -81,5 +91,8 @@ void UQInteractionComponent::PrimaryInteract()
 	}
 
 	// Draw a debug line
-	DrawDebugLine(GetWorld(), EyeLocation, End, DebugColor, false, 2.0f, 0, 2.0f);
+	if (bDebugDraw)
+	{
+		DrawDebugLine(GetWorld(), EyeLocation, End, DebugColor, false, 2.0f);
+	}
 }

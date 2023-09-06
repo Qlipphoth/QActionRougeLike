@@ -2,6 +2,10 @@
 
 
 #include "QAttributeComponent.h"
+#include "QGameModeBase.h"
+
+static TAutoConsoleVariable<float> CVarDamageMultiplier(
+	TEXT("Q.DamageMultiplier"), 1.0f, TEXT("Global damage modifier"), ECVF_Cheat);
 
 // Sets default values for this component's properties
 UQAttributeComponent::UQAttributeComponent()
@@ -28,9 +32,14 @@ bool UQAttributeComponent::IsAlive() const
 bool UQAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {	
 	// 如果角色不可被伤害，则返回 false
-	if (!GetOwner()->CanBeDamaged())
+	if (!GetOwner()->CanBeDamaged() && Delta < 0.0f)
 	{
 		return false;
+	}
+
+	if (Delta < 0.0f)
+	{
+		Delta *= CVarDamageMultiplier.GetValueOnGameThread();
 	}
 
 	float oldHealth = Health;
@@ -40,6 +49,16 @@ bool UQAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 
 	// 触发生命值变化的委托
 	OnHealthChangeDelegate.Broadcast(InstigatorActor, this, Health, Delta);
+
+	// Died
+	if (ActualDelta < 0.0f && Health <= 0.0f)
+	{
+		AQGameModeBase* GM = GetWorld()->GetAuthGameMode<AQGameModeBase>();
+		if (GM)
+		{
+			GM->OnActorKilled(GetOwner(), InstigatorActor);
+		}
+	}
 
 	return ActualDelta != 0.0f;
 }

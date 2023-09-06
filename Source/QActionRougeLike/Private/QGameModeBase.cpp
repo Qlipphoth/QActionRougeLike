@@ -9,6 +9,12 @@
 #include "QAttributeComponent.h"
 #include "EngineUtils.h"
 #include "DrawDebugHelpers.h"
+#include "QCharacter.h"
+#include "TimerManager.h"
+
+
+static TAutoConsoleVariable<bool> CVarSpawnBots(
+    TEXT("Q.SpawnBots"), true, TEXT("Enable/Disable spawning of bots"), ECVF_Cheat);
 
 
 AQGameModeBase::AQGameModeBase()
@@ -26,6 +32,11 @@ void AQGameModeBase::StartPlay()
 
 void AQGameModeBase::SpawnBotTimerElapsed()
 {
+    if (!CVarSpawnBots.GetValueOnGameThread()) {
+        UE_LOG(LogTemp, Warning, TEXT("Spawn Bot CVar disabled!"));
+        return;
+    }
+
     int Count = CountOfBots();
 
     // if (Count >= NumOfBotsToSpawn) return;
@@ -86,3 +97,29 @@ void AQGameModeBase::SlayAll()
     }
 }
 
+void AQGameModeBase::RespawnPlayerElapsed(AController *Controller)
+{
+    if (ensure(Controller))
+    {
+        Controller->UnPossess();
+        RestartPlayer(Controller);
+    }
+}
+
+void AQGameModeBase::OnActorKilled(AActor *VictimActor, AActor *KillerActor)
+{
+    AQCharacter* Player = Cast<AQCharacter>(VictimActor);
+    if (Player)
+    {
+        FTimerHandle TimerHandle_RespawnPlayer;
+
+        FTimerDelegate TimerDelegate_RespawnPlayer;
+        TimerDelegate_RespawnPlayer.BindUFunction(this, 
+            FName("RespawnPlayerElapsed"), Player->GetController());
+        
+        GetWorldTimerManager().SetTimer(
+            TimerHandle_RespawnPlayer, TimerDelegate_RespawnPlayer, 2.0f, false);
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("OnActorKilled: %s"), *VictimActor->GetName());
+}

@@ -6,6 +6,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "QAttributeComponent.h"
+#include "QGamePlayFunctionLibrary.h"
 
 // Sets default values
 AQMagicProjectile::AQMagicProjectile()
@@ -24,15 +25,21 @@ void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp,
 {
 	if (OtherActor && OtherActor != GetInstigator())
 	{
-		// 获取角色的属性组件
-		// UQAttributeComponent::StaticClass() 返回的是 UQAttributeComponent 类的 UClass 对象
-		UQAttributeComponent* AttributeComp = Cast<UQAttributeComponent>(
-			OtherActor->GetComponentByClass(UQAttributeComponent::StaticClass()));
-		if (AttributeComp) 
+		// // 获取角色的属性组件
+		// // UQAttributeComponent::StaticClass() 返回的是 UQAttributeComponent 类的 UClass 对象
+		// UQAttributeComponent* AttributeComp = Cast<UQAttributeComponent>(
+		// 	OtherActor->GetComponentByClass(UQAttributeComponent::StaticClass()));
+		// if (AttributeComp) 
+		// {
+		// 	// 对角色的生命值进行修改
+		// 	AttributeComp->ApplyHealthChange(this->GetInstigator(), -DamageAmount);
+		// 	// Destroy()
+		// 	Explode();
+		// }
+
+		if (UQGamePlayFunctionLibrary::ApplyDirectionalDamage(this->GetInstigator(), 
+			OtherActor, DamageAmount, SweepResult))
 		{
-			// 对角色的生命值进行修改
-			AttributeComp->ApplyHealthChange(this->GetInstigator(), -DamageAmount);
-			// Destroy()
 			Explode();
 		}
 	}

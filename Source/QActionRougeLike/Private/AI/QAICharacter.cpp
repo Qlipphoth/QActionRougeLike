@@ -11,6 +11,8 @@
 #include "BrainComponent.h"
 #include "QAttributeComponent.h"
 #include "QWorldUserWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values
@@ -20,6 +22,10 @@ AQAICharacter::AQAICharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;  // AI 控制器自动获取控制权
 
 	AttributeComp = CreateDefaultSubobject<UQAttributeComponent>(TEXT("AttributeComp"));
+	
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	GetMesh()->SetGenerateOverlapEvents(true);
+	
 	TimeToHitParamName = TEXT("TimeToHit");
 }
 
@@ -69,6 +75,7 @@ void AQAICharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponen
 			}
 		}
 
+		// Died
 		if (NewHealth <= 0.0f)
 		{
 			// Stop BT
@@ -82,6 +89,10 @@ void AQAICharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponen
 			GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->bBlendPhysics = true;
+
+			// remove capsule
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			GetCharacterMovement()->DisableMovement();
 
 			// set life span
 			SetLifeSpan(10.0f);

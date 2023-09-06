@@ -38,6 +38,11 @@ void AQCharacter::PostInitializeComponents()
 	AttributeComp->OnHealthChangeDelegate.AddDynamic(this, &AQCharacter::OnHealthChanged);
 }
 
+FVector AQCharacter::GetPawnViewLocation() const
+{
+    return CameraComp->GetComponentLocation();
+}
+
 void AQCharacter::MoveForward(float Value)
 {
 	FRotator ControlRot = GetControlRotation();
