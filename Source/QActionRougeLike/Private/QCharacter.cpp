@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "QAttributeComponent.h"
 #include "DrawDebugHelpers.h"
+#include "QActionComponent.h"
 
 // Sets default values
 AQCharacter::AQCharacter()
@@ -28,6 +29,8 @@ AQCharacter::AQCharacter()
 
 	AttributeComp = CreateDefaultSubobject<UQAttributeComponent>("AttributeComp");
 
+	ActionComp = CreateDefaultSubobject<UQActionComponent>("ActionComp");
+
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input
 	bUseControllerRotationYaw = false;  // We want to control yaw with mouse
 }
@@ -38,6 +41,7 @@ void AQCharacter::PostInitializeComponents()
 	AttributeComp->OnHealthChangeDelegate.AddDynamic(this, &AQCharacter::OnHealthChanged);
 }
 
+/// @brief 重写获取视角的函数
 FVector AQCharacter::GetPawnViewLocation() const
 {
     return CameraComp->GetComponentLocation();
@@ -118,13 +122,25 @@ void AQCharacter::SpwanProjectile(TSubclassOf<AActor> ProjectileClass)
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
 }
 
+void AQCharacter::sprintStart()
+{
+	ActionComp->StartActionByName(this, "Sprint");
+}
+
+void AQCharacter::sprintStop()
+{
+	ActionComp->StopActionByName(this, "Sprint");
+}
+
 void AQCharacter::PrimaryAttack()
 {
-	// 播放动画
-	PlayAnimMontage(AttackAnim);
-	// 设置定时器，0.2 秒后调用 PrimaryAttack_TimeElapsed
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-		&AQCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+	// // 播放动画
+	// PlayAnimMontage(AttackAnim);
+	// // 设置定时器，0.2 秒后调用 PrimaryAttack_TimeElapsed
+	// GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+	// 	&AQCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+
+	ActionComp->StartActionByName(this, "PrimaryAttack");
 }
 
 void AQCharacter::PrimaryAttack_TimeElapsed()
@@ -134,11 +150,12 @@ void AQCharacter::PrimaryAttack_TimeElapsed()
 
 void AQCharacter::DashAttack()
 {
-	// 播放动画
-	PlayAnimMontage(AttackAnim);
-	// 设置定时器，0.2 秒后调用 DashAttack_TimeElapsed
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-		&AQCharacter::DashAttack_TimeElapsed, 0.2f);
+	// // 播放动画
+	// PlayAnimMontage(AttackAnim);
+	// // 设置定时器，0.2 秒后调用 DashAttack_TimeElapsed
+	// GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+	// 	&AQCharacter::DashAttack_TimeElapsed, 0.2f);
+	ActionComp->StartActionByName(this, "DashAttack");
 }
 
 void AQCharacter::DashAttack_TimeElapsed()
@@ -148,11 +165,12 @@ void AQCharacter::DashAttack_TimeElapsed()
 
 void AQCharacter::BlackHoleAttack()
 {
-	// 播放动画
-	PlayAnimMontage(AttackAnim);
-	// 设置定时器，0.2 秒后调用 BlackHoleAttack_TimeElapsed
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-		&AQCharacter::BlackHoleAttack_TimeElapsed, 0.2f);
+	// // 播放动画
+	// PlayAnimMontage(AttackAnim);
+	// // 设置定时器，0.2 秒后调用 BlackHoleAttack_TimeElapsed
+	// GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
+	// 	&AQCharacter::BlackHoleAttack_TimeElapsed, 0.2f);
+	ActionComp->StartActionByName(this, "BlackHoleAttack");
 }
 
 void AQCharacter::BlackHoleAttack_TimeElapsed()
@@ -172,11 +190,14 @@ void AQCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AQCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AQCharacter::MoveRight);
-
+	
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	// 直接使用 ACharacter 的 Jump 函数
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AQCharacter::sprintStart);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AQCharacter::sprintStop);
 
 
 	// IE_Pressed: 按下时触发，相当于 unity 的 GetKeyDown

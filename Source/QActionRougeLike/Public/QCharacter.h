@@ -11,6 +11,7 @@ class UCameraComponent;
 class UQInteractionComponent;
 class UAnimMontage;
 class UQAttributeComponent;
+class UQActionComponent;
 
 UCLASS()
 class QACTIONROUGELIKE_API AQCharacter : public ACharacter
@@ -55,11 +56,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
 	UQAttributeComponent* AttributeComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QCharacter")
+	UQActionComponent* ActionComp;
+
 	void MoveForward(float Value);
 
 	void MoveRight(float Value);
 
 	void SpwanProjectile(TSubclassOf<AActor> ProjectileClass);
+
+	void sprintStart();
+
+	void sprintStop();
 
 	void PrimaryAttack();
 
