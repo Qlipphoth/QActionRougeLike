@@ -10,7 +10,8 @@ public class QActionRougeLike : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { 
 			"Core", "CoreUObject", "Engine", "InputCore", 
-			"UMG", "Slate", "SlateCore", "AIModule", "GameplayTasks", 
+			"UMG", "Slate", "SlateCore", "AIModule", 
+			"GameplayTasks", "GameplayTags", 
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

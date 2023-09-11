@@ -71,15 +71,9 @@ protected:
 
 	void PrimaryAttack();
 
-	void PrimaryAttack_TimeElapsed();
-
 	void DashAttack();
 
-	void DashAttack_TimeElapsed();
-
 	void BlackHoleAttack();
-
-	void BlackHoleAttack_TimeElapsed();
 
 	void PrimaryInteract();
 

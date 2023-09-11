@@ -73,55 +73,6 @@ void AQCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
-void AQCharacter::SpwanProjectile(TSubclassOf<AActor> ProjectileClass)
-{
-	// 从骨骼中获取手的位置
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	
-	// 设置射线检测的形状
-	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(20.0f);
-
-	// 设置射线检测的参数
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this);  // 忽略玩家角色
-
-	// 设置射线检测的参数
-	FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-
-	FVector TraceStart = GetPawnViewLocation();
-	// endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
-	FRotator Rotator = GetControlRotation();  // 方向修正
-	FVector TraceEnd = TraceStart + Rotator.Vector() * 5000.0f;
-
-	FHitResult HitResult;
-	// 射线检测
-	if (GetWorld()->SweepSingleByObjectType(HitResult, TraceStart, TraceEnd, 
-		FQuat::Identity, ObjectQueryParams, CollisionShape, QueryParams))
-	{
-		TraceEnd = HitResult.ImpactPoint;
-		DrawDebugSphere(GetWorld(), TraceEnd, 20.0f, 8, FColor::Red, false, 2.0f);
-	}
-
-	// 生成子弹的旋转方向
-	// FRotator ProjRotation = UKismetMathLibrary::FindLookAtRotation(HandLocation, TraceEnd);
-	FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
-
-	// 生成子弹的位置
-	FTransform SpawnTransform = FTransform(ProjRotation, HandLocation);
-
-	FActorSpawnParameters SpawnParams;
-	// AlwaysSpawn: 如果碰撞到其他物体，也会生成
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	// 设置生成的子弹的拥有者
-	SpawnParams.Instigator = this;
-
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
-}
-
 void AQCharacter::sprintStart()
 {
 	ActionComp->StartActionByName(this, "Sprint");
@@ -134,50 +85,18 @@ void AQCharacter::sprintStop()
 
 void AQCharacter::PrimaryAttack()
 {
-	// // 播放动画
-	// PlayAnimMontage(AttackAnim);
-	// // 设置定时器，0.2 秒后调用 PrimaryAttack_TimeElapsed
-	// GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-	// 	&AQCharacter::PrimaryAttack_TimeElapsed, 0.2f);
-
 	ActionComp->StartActionByName(this, "PrimaryAttack");
-}
-
-void AQCharacter::PrimaryAttack_TimeElapsed()
-{
-	SpwanProjectile(PrimaryProjectileClass);
 }
 
 void AQCharacter::DashAttack()
 {
-	// // 播放动画
-	// PlayAnimMontage(AttackAnim);
-	// // 设置定时器，0.2 秒后调用 DashAttack_TimeElapsed
-	// GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-	// 	&AQCharacter::DashAttack_TimeElapsed, 0.2f);
 	ActionComp->StartActionByName(this, "DashAttack");
-}
-
-void AQCharacter::DashAttack_TimeElapsed()
-{
-	SpwanProjectile(DashProjectileClass);
 }
 
 void AQCharacter::BlackHoleAttack()
 {
-	// // 播放动画
-	// PlayAnimMontage(AttackAnim);
-	// // 设置定时器，0.2 秒后调用 BlackHoleAttack_TimeElapsed
-	// GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, 
-	// 	&AQCharacter::BlackHoleAttack_TimeElapsed, 0.2f);
 	ActionComp->StartActionByName(this, "BlackHoleAttack");
 }
-
-void AQCharacter::BlackHoleAttack_TimeElapsed()
-{
-	SpwanProjectile(BlackHoleProjectileClass);
-}
-
 
 void AQCharacter::PrimaryInteract()
 {

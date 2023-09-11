@@ -4,16 +4,6 @@
 #include "QActionComponent.h"
 #include "SAction.h"
 
-// Sets default values for this component's properties
-UQActionComponent::UQActionComponent()
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
-}
-
 // Called when the game starts
 void UQActionComponent::BeginPlay()
 {
@@ -25,17 +15,6 @@ void UQActionComponent::BeginPlay()
 	}
 	
 }
-
-
-// Called every frame
-void UQActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
-
 
 void UQActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 {
@@ -55,6 +34,12 @@ bool UQActionComponent::StartActionByName(AActor *Instigator, FName ActionName)
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
+			if (!Action->CanStart(Instigator)) {
+				FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActionName.ToString() + " Can't Start";
+				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, DebugMsg);
+				continue;
+			}
+
 			Action->StartAction(Instigator);
 			return true;
 		}
@@ -68,9 +53,20 @@ bool UQActionComponent::StopActionByName(AActor *Instigator, FName ActionName)
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
-			Action->StopAction(Instigator);
-			return true;
+			if (Action->ISRunning())
+			{
+				Action->StopAction(Instigator);
+				return true;
+			}
 		}
 	}
 	return false;
+}
+
+void UQActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, DebugMsg);
 }

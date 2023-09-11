@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "GameplayTagContainer.h"
 #include "SAction.generated.h"
 
 class UWorld;
+class UQActionComponent;
 
 // Blueprintable : can be created in blueprint
 
@@ -15,7 +17,27 @@ class QACTIONROUGELIKE_API USAction : public UObject
 {
 	GENERATED_BODY()
 	
+protected:
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	UQActionComponent* GetOwningComponent() const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTagContainer GrantsTags;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTagContainer BlockedTags;
+
+	UPROPERTY()
+	bool bIsRunning;
+
 public:
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	bool ISRunning() const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	bool CanStart(class AActor* Instigator);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	void StartAction(class AActor* Instigator);
