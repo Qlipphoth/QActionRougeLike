@@ -9,6 +9,7 @@
 class UPawnSensingComponent;
 class UQAttributeComponent;
 class UQWorldUserWidget;
+class UQActionComponent;
 
 UCLASS()
 class QACTIONROUGELIKE_API AQAICharacter : public ACharacter
@@ -29,6 +30,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UQAttributeComponent* AttributeComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UQActionComponent* ActionComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UQWorldUserWidget> HealthBarWidget;

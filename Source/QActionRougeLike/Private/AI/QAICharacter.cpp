@@ -13,7 +13,7 @@
 #include "QWorldUserWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "QActionComponent.h"
 
 // Sets default values
 AQAICharacter::AQAICharacter()
@@ -23,6 +23,8 @@ AQAICharacter::AQAICharacter()
 
 	AttributeComp = CreateDefaultSubobject<UQAttributeComponent>(TEXT("AttributeComp"));
 	
+	ActionComp = CreateDefaultSubobject<UQActionComponent>(TEXT("ActionComp"));
+
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	

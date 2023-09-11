@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "QProjectileBase.h"
+#include "GameplayTagContainer.h"
 #include "QMagicProjectile.generated.h"
 
 UCLASS()
@@ -16,6 +17,9 @@ public:
 	AQMagicProjectile();
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FGameplayTag ParryTag;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float DamageAmount;

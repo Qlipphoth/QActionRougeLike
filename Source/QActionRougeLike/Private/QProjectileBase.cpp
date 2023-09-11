@@ -25,7 +25,7 @@ AQProjectileBase::AQProjectileBase()
 	AudioComp->SetupAttachment(RootComponent);
 
 	MoveComp = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMoveComp");
-	MoveComp->bRotationFollowsVelocity = true;
+	MoveComp->bRotationFollowsVelocity = true;  // 设置旋转方向跟随速度
 	MoveComp->bInitialVelocityInLocalSpace = true;
 	MoveComp->ProjectileGravityScale = 0.0f;
 	MoveComp->InitialSpeed = 8000;
