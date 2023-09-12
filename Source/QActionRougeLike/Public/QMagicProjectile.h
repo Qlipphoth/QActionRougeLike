@@ -7,6 +7,8 @@
 #include "GameplayTagContainer.h"
 #include "QMagicProjectile.generated.h"
 
+class UQActionEffect;
+
 UCLASS()
 class QACTIONROUGELIKE_API AQMagicProjectile : public AQProjectileBase
 {
@@ -20,6 +22,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<UQActionEffect> BurningActionClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float DamageAmount;

@@ -9,6 +9,8 @@
 #include "QGamePlayFunctionLibrary.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "QActionComponent.h"
+#include "QActionEffect.h"
+
 
 // Sets default values
 AQMagicProjectile::AQMagicProjectile()
@@ -30,6 +32,7 @@ void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp,
 		UQActionComponent* ActionComp = Cast<UQActionComponent>(
 			OtherActor->GetComponentByClass(UQActionComponent::StaticClass()));
 
+		// Parry
 		if (ActionComp && ActionComp->ActiveGameplayTags.HasTag(ParryTag))
 		{
 			MoveComp->Velocity = -MoveComp->Velocity;
@@ -38,10 +41,16 @@ void AQMagicProjectile::OnActorOverlap(UPrimitiveComponent *OverlappedComp,
 			return;
 		}
 
+		// Damage
 		if (UQGamePlayFunctionLibrary::ApplyDirectionalDamage(this->GetInstigator(), 
 			OtherActor, DamageAmount, SweepResult))
 		{
 			Explode();
+
+			if (ActionComp) 
+			{
+				ActionComp->AddAction(GetInstigator(), BurningActionClass);
+			}
 		}
 	}
 }

@@ -11,12 +11,12 @@ void UQActionComponent::BeginPlay()
 
 	for (TSubclassOf<USAction> ActionClass : DefaultActions)
 	{
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}
 	
 }
 
-void UQActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
+void UQActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass)
 {
 	if (ensure(ActionClass))
 	{
@@ -24,7 +24,20 @@ void UQActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 		if (ensure(NewAction))
 		{
 			Actions.Add(NewAction);
+
+			if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
+			{
+				NewAction->StartAction(Instigator);
+			}
 		}
+	}
+}
+
+void UQActionComponent::RemoveAction(USAction *ActionToRemove)
+{
+	if (ensure(ActionToRemove && !ActionToRemove->ISRunning()))
+	{
+		Actions.Remove(ActionToRemove);
 	}
 }
 
