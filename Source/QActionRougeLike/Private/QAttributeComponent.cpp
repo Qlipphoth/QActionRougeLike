@@ -3,6 +3,7 @@
 
 #include "QAttributeComponent.h"
 #include "QGameModeBase.h"
+#include "Net/UnrealNetwork.h"
 
 static TAutoConsoleVariable<float> CVarDamageMultiplier(
 	TEXT("Q.DamageMultiplier"), 1.0f, TEXT("Global damage modifier"), ECVF_Cheat);
@@ -12,6 +13,8 @@ UQAttributeComponent::UQAttributeComponent()
 {
 	HealthMax = 100.0f;
 	Health = HealthMax;
+
+	SetIsReplicatedByDefault(true);  // TODO: 为什么要设置为 ByDefault
 }
 
 bool UQAttributeComponent::Kill(AActor* Instigator)
@@ -48,7 +51,12 @@ bool UQAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 	float ActualDelta = Health - oldHealth;
 
 	// 触发生命值变化的委托
-	OnHealthChangeDelegate.Broadcast(InstigatorActor, this, Health, Delta);
+	// OnHealthChangeDelegate.Broadcast(InstigatorActor, this, Health, Delta);
+	
+	if (Delta != 0.0f)
+	{
+		MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
+	}
 
 	// Died
 	if (ActualDelta < 0.0f && Health <= 0.0f)
@@ -82,4 +90,21 @@ bool UQAttributeComponent::IsActorAlive(AActor* Actor)
 	}
 
 	return false;
+}
+
+// TODO: 这一函数不用在头文件中声明
+
+void UQAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UQAttributeComponent, Health);
+	DOREPLIFETIME(UQAttributeComponent, HealthMax);
+
+	// DOREPLIFETIME_CONDITION(UQAttributeComponent, Health, COND_InitialOnly);  // 只在初始化时复制
+}
+
+void UQAttributeComponent::MulticastHealthChanged_Implementation(AActor* InstigatorActor, float NewHealth, float Delta)
+{
+	OnHealthChangeDelegate.Broadcast(InstigatorActor, this, NewHealth, Delta);
 }

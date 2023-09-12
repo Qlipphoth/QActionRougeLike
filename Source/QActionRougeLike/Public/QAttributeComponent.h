@@ -47,11 +47,18 @@ protected:
 	// BlueprintReadOnly : can only be read in the blueprint editor
 	// Category : the category in the blueprint editor
 	// meta : additional information
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes", meta = (ClampMin = 0.0f))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Attributes", meta = (ClampMin = 0.0f))
 	float Health;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes", meta = (ClampMin = 0.0f))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Attributes", meta = (ClampMin = 0.0f))
 	float HealthMax;
+
+	// TODO:
+	// ReplicatedUsing : OnStateChanged
+	// MultiCast : transient events, dont change state
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastHealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
 
 public:	
 	
