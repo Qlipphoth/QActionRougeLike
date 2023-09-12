@@ -29,8 +29,6 @@ public:
 	AQItemChest();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QItemChest")
 	UStaticMeshComponent* BaseMesh;  // BaseMesh is the root component
@@ -38,8 +36,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QItemChest")
 	UStaticMeshComponent* LidMesh;  // LidMesh is a child of BaseMesh
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	// client 会自动调用 OnRep_IsOpened
+	UPROPERTY(ReplicatedUsing = "OnRep_IsOpened", VisibleAnywhere, BlueprintReadOnly, Category = "QItemChest")
+	bool bIsOpened;
+
+	UFUNCTION()
+	void OnRep_IsOpened();
 
 };

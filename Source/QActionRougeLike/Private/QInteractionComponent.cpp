@@ -24,7 +24,11 @@ void UQInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FindBestInteractable();
+	APawn* Owner = Cast<APawn>(GetOwner());  // Cast the owner to a pawn
+	if (Owner->IsLocallyControlled())
+	{
+		FindBestInteractable();
+	} 
 }
 
 void UQInteractionComponent::FindBestInteractable()
@@ -111,7 +115,12 @@ void UQInteractionComponent::FindBestInteractable()
 
 void UQInteractionComponent::PrimaryInteract()
 {
-	if (FocusedActor == nullptr)
+	ServerInteract(FocusedActor);
+}
+
+void UQInteractionComponent::ServerInteract_Implementation(AActor* InFocus)
+{
+	if (InFocus == nullptr)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("No interactable found"));
 		return;
@@ -120,7 +129,5 @@ void UQInteractionComponent::PrimaryInteract()
 	// Call the Iteract_Implementation function
 	APawn* Pawn = Cast<APawn>(GetOwner());  // Cast the owner to a pawn
 	// Call the Interact_Implementation function
-	IQGamePlayInterface::Execute_Interact(FocusedActor, Pawn);  
+	IQGamePlayInterface::Execute_Interact(InFocus, Pawn);
 }
-
-

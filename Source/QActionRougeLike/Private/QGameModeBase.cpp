@@ -14,7 +14,7 @@
 
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(
-    TEXT("Q.SpawnBots"), true, TEXT("Enable/Disable spawning of bots"), ECVF_Cheat);
+    TEXT("Q.SpawnBots"), false, TEXT("Enable/Disable spawning of bots"), ECVF_Cheat);
 
 
 AQGameModeBase::AQGameModeBase()

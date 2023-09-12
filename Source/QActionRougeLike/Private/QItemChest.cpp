@@ -3,7 +3,7 @@
 
 #include "QItemChest.h"
 #include "Components/StaticMeshComponent.h"
-
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AQItemChest::AQItemChest()
@@ -18,24 +18,27 @@ AQItemChest::AQItemChest()
 	LidMesh->SetupAttachment(BaseMesh);
 
 	TargetPitch = 110.0f;
+
+	SetReplicates(true);
+}
+
+void AQItemChest::OnRep_IsOpened()
+{
+	float CurPitch = bIsOpened ? TargetPitch : 0.0f;
+	LidMesh->SetRelativeRotation(FRotator(CurPitch, 0.0f, 0.0f));
 }
 
 void AQItemChest::Interact_Implementation(APawn* InstigatorPawn)
 {
-	LidMesh->SetRelativeRotation(FRotator(TargetPitch, 0.0f, 0.0f));  // Rotate the lid
+	bIsOpened = !bIsOpened;
+	OnRep_IsOpened();  // Server 需要手动调用 OnRep_IsOpened
 }
 
-// Called when the game starts or when spawned
-void AQItemChest::BeginPlay()
+void AQItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::BeginPlay();
-	
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);  // Call the base class implementation first
+
+	// c : class
+	// v : variable
+	DOREPLIFETIME(AQItemChest, bIsOpened);
 }
-
-// Called every frame
-void AQItemChest::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
