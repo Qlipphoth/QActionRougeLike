@@ -3,6 +3,9 @@
 
 #include "QActionComponent.h"
 #include "SAction.h"
+#include "../QActionRougeLike.h"
+#include "Net/UnrealNetwork.h"
+#include "Engine/ActorChannel.h"
 
 UQActionComponent::UQActionComponent()
 {
@@ -26,9 +29,11 @@ void UQActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> Acti
 {
 	if (ensure(ActionClass))
 	{
-		USAction* NewAction = NewObject<USAction>(this, ActionClass);
+		USAction* NewAction = NewObject<USAction>(GetOwner(), ActionClass);
 		if (ensure(NewAction))
 		{
+			NewAction->Initialize(this);
+			
 			Actions.Add(NewAction);
 
 			if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
@@ -93,12 +98,50 @@ void UQActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, DebugMsg);
+	// FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
+	// GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, DebugMsg);
+
+	// Draw All Actions
+	for (USAction* Action : Actions)
+	{
+		FColor TextColor = Action->ISRunning() ? FColor::Green : FColor::Red;
+
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action : %s | IsRunning : %s | Outer : %s"), 
+			*GetNameSafe(GetOwner()), 
+			*Action->ActionName.ToString(), 
+			Action->ISRunning() ? TEXT("True") : TEXT("False"), 
+			*GetNameSafe(Action->GetOuter()));
+
+		LogOnScreen(GetOwner(), ActionMsg, TextColor, 0.0f);
+	}
+
 }
 
 void UQActionComponent::ServerStartAction_Implementation(AActor *Instigator, FName ActionName)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "ServerStartAction_Implementation");
 	StartActionByName(Instigator, ActionName);
+}
+
+void UQActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// DOREPLIFETIME(UQActionComponent, Actions);
+	DOREPLIFETIME(UQActionComponent, Actions);
+}
+
+bool UQActionComponent::ReplicateSubobjects(UActorChannel *Channel, FOutBunch *Bunch, FReplicationFlags *RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	for (USAction* Action : Actions)
+	{
+		if (Action)
+		{
+			bWroteSomething |= Channel->ReplicateSubobject(Action, *Bunch, *RepFlags);
+		}
+	}
+
+	return bWroteSomething;
 }

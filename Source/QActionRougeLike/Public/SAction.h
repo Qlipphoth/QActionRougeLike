@@ -19,6 +19,9 @@ class QACTIONROUGELIKE_API USAction : public UObject
 	
 protected:
 
+	UPROPERTY(Replicated)
+	UQActionComponent* ActionComp;
+
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	UQActionComponent* GetOwningComponent() const;
 
@@ -28,10 +31,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = "OnRep_IsRunning")
 	bool bIsRunning;
 
+	UFUNCTION()
+	void OnRep_IsRunning();
+
 public:
+
+	void Initialize(UQActionComponent* NewActionComp);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	bool bAutoStart;
@@ -52,4 +60,9 @@ public:
 	FName ActionName;
 
 	UWorld* GetWorld() const override;
+
+	bool IsSupportedForNetworking() const override
+	{
+		return true;
+	}
 };

@@ -34,6 +34,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 
+	UQActionComponent();
+
 protected:
 
 	UFUNCTION(Server, Reliable)
@@ -42,16 +44,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Action")
 	TArray<TSubclassOf<USAction>> DefaultActions;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<class USAction*> Actions;
 
 	virtual void BeginPlay() override;
 
 public:
 
+	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, 
+		FReplicationFlags* RepFlags) override;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, 
 		FActorComponentTickFunction* ThisTickFunction) override;
-
-	UQActionComponent();
 
 };
