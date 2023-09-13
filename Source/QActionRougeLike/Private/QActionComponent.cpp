@@ -4,6 +4,12 @@
 #include "QActionComponent.h"
 #include "SAction.h"
 
+UQActionComponent::UQActionComponent()
+{
+	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
+}
+
 // Called when the game starts
 void UQActionComponent::BeginPlay()
 {
@@ -53,6 +59,13 @@ bool UQActionComponent::StartActionByName(AActor *Instigator, FName ActionName)
 				continue;
 			}
 
+			// Is Client
+			if (!GetOwner()->HasAuthority())
+			{
+				// 让 server 端的 client 角色执行同样的命令
+				ServerStartAction(Instigator, ActionName);
+			}
+
 			Action->StartAction(Instigator);
 			return true;
 		}
@@ -82,4 +95,10 @@ void UQActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 	FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, DebugMsg);
+}
+
+void UQActionComponent::ServerStartAction_Implementation(AActor *Instigator, FName ActionName)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "ServerStartAction_Implementation");
+	StartActionByName(Instigator, ActionName);
 }
