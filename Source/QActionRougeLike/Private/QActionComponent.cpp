@@ -18,15 +18,23 @@ void UQActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (TSubclassOf<USAction> ActionClass : DefaultActions)
+	if (GetOwner()->HasAuthority())
 	{
-		AddAction(GetOwner(), ActionClass);
+		for (TSubclassOf<USAction> ActionClass : DefaultActions)
+		{
+			AddAction(GetOwner(), ActionClass);
+		}
 	}
-	
 }
 
 void UQActionComponent::AddAction(AActor* Instigator, TSubclassOf<USAction> ActionClass)
 {
+	// Skip for client
+	if (!GetOwner()->HasAuthority()) {
+		UE_LOG(LogTemp, Warning, TEXT("Client can't add action"));
+		return;
+	}
+
 	if (ensure(ActionClass))
 	{
 		USAction* NewAction = NewObject<USAction>(GetOwner(), ActionClass);
@@ -86,6 +94,14 @@ bool UQActionComponent::StopActionByName(AActor *Instigator, FName ActionName)
 		{
 			if (Action->ISRunning())
 			{
+
+				// Is Client
+				if (!GetOwner()->HasAuthority())
+				{
+					// 让 server 端的 client 角色执行同样的命令
+					ServerStopAction(Instigator, ActionName);
+				}
+
 				Action->StopAction(Instigator);
 				return true;
 			}
@@ -104,14 +120,10 @@ void UQActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// Draw All Actions
 	for (USAction* Action : Actions)
 	{
-		FColor TextColor = Action->ISRunning() ? FColor::Green : FColor::Red;
+		FColor TextColor = Action->ISRunning() ? FColor::Blue : FColor::White;
 
-		FString ActionMsg = FString::Printf(TEXT("[%s] Action : %s | IsRunning : %s | Outer : %s"), 
-			*GetNameSafe(GetOwner()), 
-			*Action->ActionName.ToString(), 
-			Action->ISRunning() ? TEXT("True") : TEXT("False"), 
-			*GetNameSafe(Action->GetOuter()));
-
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action : %s"), 
+			*GetNameSafe(GetOwner()), *GetNameSafe(Action));
 		LogOnScreen(GetOwner(), ActionMsg, TextColor, 0.0f);
 	}
 
@@ -119,8 +131,13 @@ void UQActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UQActionComponent::ServerStartAction_Implementation(AActor *Instigator, FName ActionName)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "ServerStartAction_Implementation");
+	// GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "ServerStartAction_Implementation");
 	StartActionByName(Instigator, ActionName);
+}
+
+void UQActionComponent::ServerStopAction_Implementation(AActor *Instigator, FName ActionName)
+{
+	StopActionByName(Instigator, ActionName);
 }
 
 void UQActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const

@@ -40,31 +40,41 @@ bool UQAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delt
 		return false;
 	}
 
+	// if (!GetOwner()->HasAuthority())
+	// {
+	// 	return false;
+	// }
+
 	if (Delta < 0.0f)
 	{
 		Delta *= CVarDamageMultiplier.GetValueOnGameThread();
 	}
 
 	float oldHealth = Health;
-	Health = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
+	float newHealth = FMath::Clamp(Health + Delta, 0.0f, HealthMax);
 
-	float ActualDelta = Health - oldHealth;
+	float ActualDelta = newHealth - oldHealth;
 
 	// 触发生命值变化的委托
 	// OnHealthChangeDelegate.Broadcast(InstigatorActor, this, Health, Delta);
 	
-	if (Delta != 0.0f)
+	if (GetOwner()->HasAuthority())
 	{
-		MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
-	}
+		Health = newHealth;
 
-	// Died
-	if (ActualDelta < 0.0f && Health <= 0.0f)
-	{
-		AQGameModeBase* GM = GetWorld()->GetAuthGameMode<AQGameModeBase>();
-		if (GM)
+		if (Delta != 0.0f)
 		{
-			GM->OnActorKilled(GetOwner(), InstigatorActor);
+			MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
+		}
+
+		// Died
+		if (ActualDelta < 0.0f && Health <= 0.0f)
+		{
+			AQGameModeBase* GM = GetWorld()->GetAuthGameMode<AQGameModeBase>();
+			if (GM)
+			{
+				GM->OnActorKilled(GetOwner(), InstigatorActor);
+			}
 		}
 	}
 

@@ -140,5 +140,7 @@ void AQCharacter::OnHealthChanged(AActor* InstigatorActor, UQAttributeComponent*
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		DisableInput(PC);
+
+		SetLifeSpan(10.0f);
 	}
 }

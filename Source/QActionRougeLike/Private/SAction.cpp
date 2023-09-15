@@ -26,25 +26,27 @@ bool USAction::CanStart_Implementation(AActor *Instigator)
 void USAction::StartAction_Implementation(AActor *Instigator)
 {
     // UE_LOG(LogTemp, Warning, TEXT("Action %s started"), *ActionName.ToString());
-    LogOnScreen(this, "Action " + ActionName.ToString() + " started", FColor::Green);
+    // LogOnScreen(this, "Action " + ActionName.ToString() + " started", FColor::Green);
 
     UQActionComponent* comp = GetOwningComponent();
     comp->ActiveGameplayTags.AppendTags(GrantsTags);
 
-    bIsRunning = true;
+    RepData.bIsRunning = true;
+    RepData.Instigator = Instigator;
 }
 
 void USAction::StopAction_Implementation(AActor *Instigator)
 {
     // UE_LOG(LogTemp, Warning, TEXT("Action %s stopped"), *ActionName.ToString());
-    LogOnScreen(this, "Action " + ActionName.ToString() + " stopped", FColor::Red);
+    // LogOnScreen(this, "Action " + ActionName.ToString() + " stopped", FColor::White);
 
     // ensureAlways(bIsRunning);
 
     UQActionComponent* comp = GetOwningComponent();
     comp->ActiveGameplayTags.RemoveTags(GrantsTags);
 
-    bIsRunning = false;
+    RepData.bIsRunning = false;
+    RepData.Instigator = Instigator;
 }
 
 UWorld *USAction::GetWorld() const
@@ -66,18 +68,18 @@ UQActionComponent *USAction::GetOwningComponent() const
 
 bool USAction::ISRunning() const
 {
-    return bIsRunning;
+    return RepData.bIsRunning;
 }
 
-void USAction::OnRep_IsRunning()
+void USAction::OnRep_RepData()
 {
-    if (bIsRunning)
+    if (RepData.bIsRunning)
     {
-        StartAction(nullptr);
+        StartAction(RepData.Instigator);
     }
     else
     {
-        StopAction(nullptr);
+        StopAction(RepData.Instigator);
     }
 }
 
@@ -87,6 +89,6 @@ void USAction::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetime
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     // Replicate bIsRunning
-    DOREPLIFETIME(USAction, bIsRunning);
+    DOREPLIFETIME(USAction, RepData);
     DOREPLIFETIME(USAction, ActionComp);
 }

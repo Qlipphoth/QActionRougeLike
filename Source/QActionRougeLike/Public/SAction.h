@@ -10,8 +10,25 @@
 class UWorld;
 class UQActionComponent;
 
-// Blueprintable : can be created in blueprint
+// Struct will arrive at the same time
 
+USTRUCT()
+struct FActionRepData
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	bool bIsRunning;
+
+	UPROPERTY()
+	AActor* Instigator;
+};
+
+
+
+// Blueprintable : can be created in blueprint
 UCLASS(Blueprintable)
 class QACTIONROUGELIKE_API USAction : public UObject
 {
@@ -31,11 +48,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
-	UPROPERTY(ReplicatedUsing = "OnRep_IsRunning")
-	bool bIsRunning;
+	UPROPERTY(ReplicatedUsing = "OnRep_RepData")
+	FActionRepData RepData;
 
 	UFUNCTION()
-	void OnRep_IsRunning();
+	void OnRep_RepData();
 
 public:
 
@@ -61,6 +78,7 @@ public:
 
 	UWorld* GetWorld() const override;
 
+	// 重写该函数，使得该类可以被网络同步
 	bool IsSupportedForNetworking() const override
 	{
 		return true;

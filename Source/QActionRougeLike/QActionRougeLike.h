@@ -10,9 +10,9 @@ static void LogOnScreen(UObject* WorldContext, FString Msg,
 {
     if (!ensure(WorldContext)) return;
 
+    // 用于区分客户端和服务端
     UWorld* World = WorldContext->GetWorld();
     if (!ensure(World)) return;
-
     FString NetPrefix = World->IsNetMode(NM_Client) ? FString("[Client] ") : FString("[Server] ");
 
     if (GEngine)

@@ -41,6 +41,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerStartAction(AActor* Instigator, FName ActionName);
 
+	UFUNCTION(Server, Reliable)
+	void ServerStopAction(AActor* Instigator, FName ActionName);
+
 	UPROPERTY(EditAnywhere, Category = "Action")
 	TArray<TSubclassOf<USAction>> DefaultActions;
 
@@ -51,6 +54,7 @@ protected:
 
 public:
 
+	// 重写 ReplicateSubobjects，用于同步 Actions 数组
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, 
 		FReplicationFlags* RepFlags) override;
 
